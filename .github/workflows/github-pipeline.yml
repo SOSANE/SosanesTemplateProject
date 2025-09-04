@@ -27,7 +27,8 @@ jobs:
             - name: Enregistrer une image
               run: |
                 docker commit project_db project_db:latest
-                docker save project_db:latest project_backend -o project.tar
+                docker commit project_backend project_backend:latest
+                docker save project_db:latest project_backend:latest -o project.tar
 
             - name: Uploader une image en tant qu'artifact
               uses: actions/upload-artifact@v4
