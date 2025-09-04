@@ -26,7 +26,9 @@ jobs:
             
             - name: Enregistrer une image
               run: |
-                docker save sha256:40f0f3592b8a35fd34f9ea00fe90fd6db7110c45682c9bcaedeebe107b503e88 sha256:c2faa4f0225df41b2e0dc9bddf69cd29285ff19843a48dbc2bc653b60b0db99f -o project.tar
+                DB_CONTAINER_ID=$(docker ps --filter "name=project_db" --format "{{.ID}}")
+                BACKEND_CONTAINER_ID=$(docker ps --filter "name=project_backend" --format "{{.ID}}")
+                docker save $MSSQL_CONTAINER_ID $BACKEND_CONTAINER_ID -o project.tar
 
             - name: Uploader une image en tant qu'artifact
               uses: actions/upload-artifact@v4
