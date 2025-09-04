@@ -53,6 +53,7 @@ jobs:
                 docker load -i ./artifacts/project.tar
                 docker build -t project_db:latest .
                 docker build -t project_backend:latest .
+                docker ps
                 
             - name: Exécuter test API
               run: |
