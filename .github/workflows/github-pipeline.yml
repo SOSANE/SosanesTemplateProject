@@ -51,7 +51,8 @@ jobs:
             - name: Télécharger l'image
               run: |
                 docker load -i ./artifacts/project.tar
-                docker build -t project_db:latest project_backend:latest
+                docker build -t project_db:latest
+                docker build -t project_backend:latest
                 
             - name: Exécuter test API
               run: |
