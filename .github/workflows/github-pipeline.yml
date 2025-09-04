@@ -26,9 +26,8 @@ jobs:
             
             - name: Enregistrer une image
               run: |
-                DB_CONTAINER_ID=$(docker ps --filter "name=project_db" --format "{{.ID}}")
-                BACKEND_CONTAINER_ID=$(docker ps --filter "name=project_backend" --format "{{.ID}}")
-                docker save $MSSQL_CONTAINER_ID $BACKEND_CONTAINER_ID -o project.tar
+                docker commit project_db project_db:latest
+                docker save project_db:latest project_backend -o project.tar
 
             - name: Uploader une image en tant qu'artifact
               uses: actions/upload-artifact@v4
