@@ -1,0 +1,1 @@
+# Documentation complète de l'API (Swagger/OpenAPI)

@@ -1,0 +1,55 @@
+name: Build et tester le projet
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build:
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Build les containers
+              run: |
+                docker compose up --build -d
+                sleep 30
+            
+            - name: linting and formatting
+              run: |
+                docker exec project_backend bash
+            
+            - name: Enregistrer une image
+              run: |
+                docker save project_db project_backend -o project.tar
+
+            - name: Uploader une image en tant qu'artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: projecttemplate-image
+                path: project.tar
+    test:
+        needs: build
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Télécharger l'artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: projecttemplate-image
+                path: ./artifacts
+
+            - name: Télécharger l'image
+              run: |
+                docker load -i ./artifacts/project.tar
+                
+            - name: Exécuter test API
+              run: |
+                docker exec project_backend bash -c "python manage.py test tests"
