@@ -22,9 +22,18 @@ jobs:
           docker compose up --build -d
           sleep 30
 
+      - name: ReviewDog
+        uses: reviewdog/action-setup@v1.4.0
+        with:
+          reviewdog_version: v1.4.0
+
       - name: Analyse du code et formatage
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker exec project_backend bash -c "pylint --output-format github --recursive=yes /backend/; black --check ."
+          docker exec project_backend pylint --output-format=github /backend/ \
+            | reviewdog -f=github -name="pylint" -reporter=github-pr-review -fail-on-error=false -level=warning \
+            | black --check .
 
       - name: Enregistrer une image
         run: |
@@ -58,4 +67,4 @@ jobs:
 
       - name: Exécuter test API
         run: |
-          docker exec project_backend bash -c "python manage.py test tests"
+          docker exec project_backend python manage.py test tests
