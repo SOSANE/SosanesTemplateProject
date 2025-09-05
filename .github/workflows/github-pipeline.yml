@@ -1,59 +1,63 @@
 name: Build et tester le projet
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
-    build:
-        runs-on: ubuntu-24.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Build les containers
-              run: |
-                docker compose up --build -d
-                sleep 30
-            
-            - name: linting and formatting
-              run: |
-                docker exec project_backend bash
-            
-            - name: Enregistrer une image
-              run: |
-                docker commit project_db project_db:latest
-                docker commit project_backend project_backend:latest
-                docker save project_db:latest project_backend:latest -o project.tar
+      - name: Build les containers
+        run: |
+          docker compose up --build -d
+          sleep 30
 
-            - name: Uploader une image en tant qu'artifact
-              uses: actions/upload-artifact@v4
-              with:
-                name: projecttemplate-image
-                path: project.tar
-    test:
-        needs: build
-        runs-on: ubuntu-24.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+      - name: Analyse du code et formatage
+        run: |
+          docker exec project_backend bash
+          pylint --recursive=yes /backend/
+          black --check .
 
-            - name: Télécharger l'artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: projecttemplate-image
-                path: .
+      - name: Enregistrer une image
+        run: |
+          docker commit project_db project_db:latest
+          docker commit project_backend project_backend:latest
+          docker save project_db:latest project_backend:latest -o project.tar
 
-            - name: Télécharger l'image
-              run: |
-                docker load -i project.tar
-                docker compose up -d
-                sleep 30
-                
-            - name: Exécuter test API
-              run: |
-                docker exec project_backend bash -c "python manage.py test tests"
+      - name: Uploader une image en tant qu'artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: projecttemplate-image
+          path: project.tar
+  test:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Télécharger l'artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: projecttemplate-image
+          path: .
+
+      - name: Télécharger l'image
+        run: |
+          docker load -i project.tar
+          docker compose up -d
+          sleep 30
+
+      - name: Exécuter test API
+        run: |
+          docker exec project_backend bash -c "python manage.py test tests"

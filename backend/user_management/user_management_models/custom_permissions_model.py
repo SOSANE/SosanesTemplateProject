@@ -26,7 +26,7 @@ class CustomPermissions(models.Model):
     # provide user frendly names in Django Admin Console
     def __str__(self):
         ret = self.en_name
-        return ret
+        return str(ret)
 
     class Meta:
         # setting the model name in Django Admin Console

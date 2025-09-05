@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions, status
-from django.db import IntegrityError
+from rest_framework import permissions
 from django.db.models import Q
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,6 +15,7 @@ from user_management.views.utils import is_undefined
 from user_management.serializers.get_permissions_serializer import (
     GetPermissionsSerializer,
 )
+
 
 # getting existing permissions
 class GetPermissions(APIView):
@@ -80,25 +80,3 @@ class GetUserPermissions(APIView):
                     # pushing results in the array
                     json_object_array.append(json_object)
             return JsonResponse(json_object_array, safe=False)
-
-
-
-# getting pending permissions (permissions that have been requested, but not approved yet)
-class GetPendingPermissions(APIView):
-    def get(self, request):
-        return get_pending_permissions(request)
-
-    def get_permissions(self):
-        return [permissions.IsAuthenticated()]
-
-
-# getting available permissions (for permission requests)
-# available permissions: permissions that are not in user' permissions and/or in user' pending permissions
-class GetAvailablePermissionsForRequest(APIView):
-    def get(self, request):
-        return get_available_permissions(request)
-
-    # def get_permissions(self):
-    #     return [permissions.IsAuthenticated()]
-
-
