@@ -32,9 +32,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker exec project_backend pylint --output-format=github /backend/ \
-            | reviewdog -f=pylint -name="pylint" -reporter=github-pr-review -fail-on-error=false -level=warning
-
-            - name: Analyse du code et formatage
+            | reviewdog -f=checkstyle -name="pylint" -reporter=github-pr-review -fail-on-error=false -level=warning
 
       - name: Formatage
         uses: reviewdog/action-black@v3
