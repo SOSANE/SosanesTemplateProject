@@ -28,7 +28,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
-          glob_pattern: "**/*.py"
+          pylint_rc: /backend/.pylintrc
 
       - name: Formatage
         uses: reviewdog/action-black@v3
