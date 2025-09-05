@@ -27,13 +27,21 @@ jobs:
         with:
           reviewdog_version: latest
 
-      - name: Analyse du code et formatage
+      - name: Analyse du code
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker exec project_backend pylint --output-format=github /backend/ \
-            | reviewdog -f=github -name="pylint" -reporter=github-pr-review -fail-on-error=false -level=warning \
-            | black --check .
+            | reviewdog -f=pylint -name="pylint" -reporter=github-pr-review -fail-on-error=false -level=warning
+
+            - name: Analyse du code et formatage
+
+      - name: Formatage
+        uses: reviewdog/action-black@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
 
       - name: Enregistrer une image
         run: |
