@@ -51,7 +51,7 @@ jobs:
             - name: Télécharger l'image
               run: |
                 docker load -i project.tar
-                docker ps
+                docker compose up -d
                 
             - name: Exécuter test API
               run: |
