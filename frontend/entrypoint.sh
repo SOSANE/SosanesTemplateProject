@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 printf "\n\n=================== (DÉBUT)  INSTALLER DÉPENDANCES ===================\n\n"
 npm install

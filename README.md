@@ -30,7 +30,7 @@ On se met d'accord sur la tech stack suivante, risque à être modifié:
 
 ## Exécuter le projet
 ```sh
-git clone <>
+git clone https://github.com/SOSANE/SosanesTemplateProject.git
 cd sosanestemplateproject
 ```
 
