@@ -52,6 +52,7 @@ jobs:
               run: |
                 docker load -i project.tar
                 docker compose up -d
+                sleep 30
                 
             - name: Exécuter test API
               run: |
