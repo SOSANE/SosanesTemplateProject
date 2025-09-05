@@ -46,14 +46,11 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                 name: projecttemplate-image
-                path: ./artifacts
+                path: .
 
             - name: Télécharger l'image
               run: |
-                docker load -i ./artifacts/project.tar
-                docker build -t project_db:latest .
-                docker build -t project_backend:latest .
-                docker ps
+                docker load -i project.tar
                 
             - name: Exécuter test API
               run: |
