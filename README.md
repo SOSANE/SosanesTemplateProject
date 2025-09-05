@@ -20,7 +20,7 @@ Référence:
 On se met d'accord sur la tech stack suivante, risque à être modifié: 
 - Backend & API: Django 4.x (Python), Django Rest Framework (avec drf-spectacular)
 - Cache: Redis
-- Base de données: PostgreSQL
+- Base de données: PostgreSQL +14
 - Frontend: React/Redux +18 (Styling avec React Bootstrap, Tailwind CSS, Styled Components)
 - Frontend testing: Vitest + React Testing Library
 - Backend testing: Django's TestCase/DRF's APITestCase
