@@ -24,7 +24,7 @@ jobs:
 
       - name: Analyse du code et formatage
         run: |
-          docker exec project_backend bash -c "pylint --recursive=yes /backend/; black --check ."
+          docker exec project_backend bash -c "pylint --output-format github --recursive=yes /backend/; black --check ."
 
       - name: Enregistrer une image
         run: |
