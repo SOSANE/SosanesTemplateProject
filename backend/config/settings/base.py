@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-57)4%+i#30iz@n1-=0erpgidx&jpmhs4^l(nu#k1v*(8sv0zc5"
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
@@ -158,7 +158,7 @@ JWT_AUTH = {
 
 # JWT Settings list: https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
 SIMPLE_JWT = {
-    "AUTH_HEADER_TYPES": ("Bearer"),
+    "AUTH_HEADER_TYPES": ["JWT"],
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
