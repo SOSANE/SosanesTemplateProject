@@ -9,7 +9,7 @@ Supprimer les checkboxes qui ne s'appliquent pas.
 
 - [ ] Bug fix
 - [ ] Nouvelle fonctionnalité
-- [ ] Modification de documentation
+- [ ] Modification de la documentation
 
 # Capture d'écrans
 Si pertinent, veuillez ajouter des captures d'écrans

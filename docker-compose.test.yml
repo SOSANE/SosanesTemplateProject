@@ -1,0 +1,168 @@
+version: '3.8'
+
+# Configuration Docker Compose pour les tests
+# Utilise des ports différents pour éviter les conflits
+
+services:
+  # Frontend de test
+  frontend-test:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: builder  # Utilise seulement le stage de build pour les tests
+    ports:
+      - "3001:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8081/api
+      - REACT_APP_ENV=test
+      - CI=true
+    depends_on:
+      - backend-test
+    networks:
+      - test-network
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/cypress:/app/cypress:ro
+    command: >
+      sh -c "npm ci && 
+             npm run test:ci && 
+             npm run build && 
+             npm run cypress:run"
+
+  # Backend de test
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+      - DATABASE_URL=jdbc:postgresql://db-test:5432/testdb
+      - DATABASE_USERNAME=testuser
+      - DATABASE_PASSWORD=testpass
+      - JWT_SECRET=test-secret-key
+      - REDIS_URL=redis://redis-test:6379
+    depends_on:
+      db-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_started
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Base de données de test
+  db-test:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+      - ./database/test-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d testdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - test-network
+
+  # Redis de test
+  redis-test:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - test_redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - test-network
+
+  # Service pour les tests de charge
+  load-test:
+    image: loadimpact/k6:latest
+    volumes:
+      - ./tests/load:/scripts
+    environment:
+      - TARGET_URL=http://backend-test:8080
+    depends_on:
+      - backend-test
+    networks:
+      - test-network
+    profiles:
+      - load-testing
+    command: run /scripts/load-test.js
+
+  # Service pour les tests de sécurité
+  security-test:
+    image: owasp/zap2docker-stable
+    volumes:
+      - ./tests/security:/zap/wrk
+    environment:
+      - TARGET_URL=http://backend-test:8080
+    depends_on:
+      - backend-test
+    networks:
+      - test-network
+    profiles:
+      - security-testing
+    command: >
+      zap-baseline.py 
+      -t http://backend-test:8080 
+      -J /zap/wrk/security-report.json
+
+  # Service de test de performance
+  performance-test:
+    image: sitespeedio/sitespeed.io
+    volumes:
+      - ./tests/performance:/sitespeed.io
+    environment:
+      - TARGET_URL=http://frontend-test:3000
+    depends_on:
+      - frontend-test
+    networks:
+      - test-network
+    profiles:
+      - performance-testing
+    command: >
+      sitespeed.io 
+      --outputFolder /sitespeed.io/results 
+      http://frontend-test:3000
+
+volumes:
+  test_postgres_data:
+    driver: local
+  test_redis_data:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge
+
+# Commandes d'utilisation :
+# 
+# Tests de base :
+# docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+#
+# Tests de charge :
+# docker-compose -f docker-compose.test.yml --profile load-testing up
+#
+# Tests de sécurité :
+# docker-compose -f docker-compose.test.yml --profile security-testing up
+#
+# Tests de performance :
+# docker-compose -f docker-compose.test.yml --profile performance-testing up
+#
+# Nettoyage :
+# docker-compose -f docker-compose.test.yml down -v
+
