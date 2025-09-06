@@ -86,7 +86,6 @@ jobs:
           pylint_args: "--output-format=json2 /backend/"
           glob_pattern: "**/*.py"
           pylint_rc: "/backend/.pylintrc"
-          reviewdog_flags: "-f=sarif -fail-on-error=false"
 
       - name: (Backend) Vérification du formatage
         uses: reviewdog/action-black@v3
