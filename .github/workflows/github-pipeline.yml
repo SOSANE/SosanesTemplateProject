@@ -26,7 +26,9 @@ jobs:
         run: |
           docker commit project_db project_db:latest
           docker commit project_backend project_backend:latest
-          docker save project_db:latest project_backend:latest -o project.tar
+          docker commit project_frontend project_frontend:latest
+          docker commit project_nginx project_nginx:latest
+          docker save project_db:latest project_backend:latest project_frontend:latest project_nginx:latest -o project.tar
 
       - name: Uploader une image en tant qu'artifact
         uses: actions/upload-artifact@v4
@@ -49,6 +51,7 @@ jobs:
       - name: Télécharger l'image
         run: |
           docker load -i project.tar
+          docker image ls -a
           docker compose up -d
           sleep 30
 
