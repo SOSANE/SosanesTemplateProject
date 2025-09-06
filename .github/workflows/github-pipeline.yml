@@ -67,7 +67,7 @@ jobs:
         with:
           node-version: "20"
 
-      - run: npm install eslint -D
+      - run: npm install eslint eslint-plugin-react-hooks eslint-plugin-react-refresh -D
 
       - name: (Backend) Analyse du code
         uses: dciborow/action-pylint@0.1.0
