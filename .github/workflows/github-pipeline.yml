@@ -68,11 +68,13 @@ jobs:
           reviewdog_version: latest
 
       - name: (Backend) Analyse du code
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker exec project_backend pylint --output-format=json2 /backend/ \
-          | reviewdog -f=sarif -name="pylint" -reporter=github-pr-review -fail-on-error=false -level=warning
+        uses: dciborow/action-pylint@0.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          glob_pattern: "**/*.py"
+          pylint_rc: /backend/.pylintrc
 
       - name: (Backend) Vérification du formatage
         uses: reviewdog/action-black@v3
