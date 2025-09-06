@@ -83,23 +83,22 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
-          pylint_args: "--output-format=json2 /backend/"
-          glob_pattern: "**/*.py"
-          pylint_rc: "/backend/.pylintrc"
+          workdir: backend
+          pylint_args: "--rcfile=.pylintrc"
 
       - name: (Backend) Vérification du formatage
         uses: reviewdog/action-black@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          workdir: backend
           black_args: "--check ."
-          workdir: "/backend/"
           level: warning
 
       - name: (Frontend) Analyse du code
         uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workdir: "/frontend/"
+          workdir: frontend
           reporter: github-pr-review
           level: warning
