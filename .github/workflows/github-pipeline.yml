@@ -1,4 +1,4 @@
-name: Build et tester le projet
+name: CI Pipeline
 
 on:
   push:
@@ -62,10 +62,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ReviewDog
-        uses: reviewdog/action-setup@d8edfce3dd5e1ec6978745e801f9c50b5ef80252 # v1.4.0
+      - name: Install dependencies
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
-          reviewdog_version: latest
+          node-version: "20"
+
+      - run: npm install eslint -D
 
       - name: (Backend) Analyse du code
         uses: dciborow/action-pylint@0.1.0
