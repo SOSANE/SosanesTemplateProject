@@ -10,11 +10,6 @@ on:
       - main
       - develop
 
-permissions:
-  contents: read
-  pull-requests: write
-  checks: write
-
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -67,6 +62,10 @@ jobs:
 
   quality_gate:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,22 +83,24 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
-          workdir: /backend/
+          pylint_args: "--output-format=json2 /backend/"
           glob_pattern: "**/*.py"
-          pylint_rc: /backend/.pylintrc
+          pylint_rc: "/backend/.pylintrc"
+          reviewdog_flags: "-f=sarif -fail-on-error=false -level=warning"
 
       - name: (Backend) Vérification du formatage
         uses: reviewdog/action-black@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
-          workdir: /backend/
+          black_args: "--check ."
+          workdir: "/backend/"
           level: warning
 
       - name: (Frontend) Analyse du code
         uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workdir: /frontend/
+          workdir: "/frontend/"
           reporter: github-pr-review
           level: warning
