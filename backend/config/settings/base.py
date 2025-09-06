@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-57)4%+i#30iz@n1-=0erpgidx&jpmhs4^l(nu#k1v*(8sv0zc5"
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition

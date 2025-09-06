@@ -3,12 +3,16 @@ from django.db import models
 from django.db.models import Q
 
 ##################################################################################
-# USER MODELS
+# MODÉLES D'UTILISATEUR
 ##################################################################################
 
 
-# customize user manager by allowing the user to log in by email or username
+# Connexion par email ou username
 class CustomUserManager(UserManager):
+    """
+    CustomUserManager pour le modèle User
+    """
+
     def get_by_natural_key(self, username):
         return self.get(
             Q(**{self.model.USERNAME_FIELD: username})
@@ -17,6 +21,10 @@ class CustomUserManager(UserManager):
 
 
 class User(AbstractUser):
+    """
+    Modèle User
+    """
+
     objects = CustomUserManager()
     secondary_email = models.EmailField(max_length=254, blank=True, null=True)
     first_name = models.CharField(max_length=30, null=False, blank=False)
