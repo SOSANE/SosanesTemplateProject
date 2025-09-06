@@ -1,59 +1,104 @@
-name: Build et tester le projet
+name: CI Pipeline
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
-    build:
-        runs-on: ubuntu-24.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Build les containers
-              run: |
-                docker compose up --build -d
-                sleep 30
-            
-            - name: linting and formatting
-              run: |
-                docker exec project_backend bash
-            
-            - name: Enregistrer une image
-              run: |
-                docker commit project_db project_db:latest
-                docker commit project_backend project_backend:latest
-                docker save project_db:latest project_backend:latest -o project.tar
+      - name: Build les containers
+        run: |
+          docker compose up --build -d
+          sleep 30
 
-            - name: Uploader une image en tant qu'artifact
-              uses: actions/upload-artifact@v4
-              with:
-                name: projecttemplate-image
-                path: project.tar
-    test:
-        needs: build
-        runs-on: ubuntu-24.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+      - name: Enregistrer une image
+        run: |
+          docker commit project_db project_db:latest
+          docker commit project_backend project_backend:latest
+          docker commit project_frontend project_frontend:latest
+          docker commit project_nginx project_nginx:latest
+          docker commit project_redis project_redis:latest
+          docker save project_db:latest project_backend:latest project_frontend:latest project_nginx:latest project_redis:latest -o project.tar
 
-            - name: Télécharger l'artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: projecttemplate-image
-                path: .
+      - name: Uploader une image en tant qu'artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: projecttemplate-image
+          path: project.tar
+  test:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Télécharger l'image
-              run: |
-                docker load -i project.tar
-                docker compose up -d
-                sleep 30
-                
-            - name: Exécuter test API
-              run: |
-                docker exec project_backend bash -c "python manage.py test tests"
+      - name: Télécharger l'artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: projecttemplate-image
+          path: .
+
+      - name: Télécharger l'image
+        run: |
+          docker load -i project.tar
+          docker image ls -a
+          docker compose up -d
+          sleep 30
+
+      - name: Exécuter test API
+        run: |
+          docker exec project_backend python manage.py test tests
+
+  quality_gate:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: "20"
+
+      - run: npm install eslint eslint-plugin-react-hooks eslint-plugin-react-refresh -D
+
+      - name: (Backend) Analyse du code
+        uses: dciborow/action-pylint@0.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          workdir: backend
+          pylint_args: "--rcfile=.pylintrc"
+
+      - name: (Backend) Vérification du formatage
+        uses: reviewdog/action-black@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          workdir: backend
+          black_args: "--check ."
+          level: warning
+
+      - name: (Frontend) Analyse du code
+        uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workdir: frontend
+          reporter: github-pr-review
+          level: warning

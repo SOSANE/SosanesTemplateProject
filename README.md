@@ -26,7 +26,7 @@ On se met d'accord sur la tech stack suivante, risque à être modifié:
 - Backend testing: Django's TestCase/DRF's APITestCase
 - Outils CI/CD: Github Actions, container avec Docker
 - Monitoring: Prometheus/Grafana
-- (Potentiellement) Reverse proxy: Nginx
+- Reverse proxy: Nginx
 
 ## Exécuter le projet
 ```sh
@@ -39,28 +39,25 @@ Exécuter avec Docker:
 docker compose up --build
 ```
 
-Attendre que tous les containers ont finis de build. L'interface Swagger UI pour le backend est accessible sur: http://127.0.0.1:8000/
-
+Attendre que tous les containers ont finis de build. L'interface Swagger UI pour le backend est accessible sur: http://localhost:8000/
 ![swagger-ui-interface](/docs/images/swagger-ui-interface.png)
 
-### Éxecuter des tests
+
+Le frontend est accessible avec http://localhost:5173/
+![frontend-interface](/docs/images/frontend-interface.png)
+
+### Exécuter des tests
 ```sh
 docker exec -it project_backend bash
-```
-
-```sh
 python manage.py test tests
 ```
 
 ### Créer un super-utilisateur (superuser)
 ```sh
 docker exec -it project_backend bash
-```
-
-```sh
 python manage.py createsuperuser
 ```
 
-En accédant sur http://127.0.0.1:8000/api/admin, on peut se connecter sur le dashboard d'administrateur
+En accédant sur http://localhost:8000/api/admin, on peut se connecter sur le dashboard d'administrateur
 ![django-admin-login-page](/docs/images/django-admin-login-page.png)
 ![django-admin-interface](/docs/images/django-admin-interface.png)

@@ -25,11 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-57)4%+i#30iz@n1-=0erpgidx&jpmhs4^l(nu#k1v*(8sv0zc5"
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
-
 INSTALLED_APPS = [
     # APPS
     "backend.backend_models",
@@ -84,7 +83,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -100,7 +98,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Permission classes is empty because this application does not need an authenticated user for sending POST Requests to the API
+# Permission classes is empty because this application does not need an
+# authenticated user for sending POST Requests to the API
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
@@ -113,6 +112,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+# Swagger UI avec drf-spectacular
 # https://github.com/tfranzel/drf-spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "Project template API",
@@ -127,15 +127,9 @@ AUTH_USER_MODEL = "user_management_models.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
-
-# TIME_ZONE = 'Canada/Eastern'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 CORS_ALLOW_HEADERS = [
@@ -158,7 +152,7 @@ JWT_AUTH = {
 
 # JWT Settings list: https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
 SIMPLE_JWT = {
-    "AUTH_HEADER_TYPES": ("Bearer"),
+    "AUTH_HEADER_TYPES": ["JWT"],
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
@@ -217,9 +211,18 @@ LOGGING = {
     },
 }
 
+# Test runner
 TEST_RUNNER = "tests.test_runner.NoDbTestRunner"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Cache Redis
+# https://docs.djangoproject.com/en/5.2/topics/cache/
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379",
+    }
+}
