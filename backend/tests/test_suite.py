@@ -9,6 +9,7 @@ class BackendTest(APITestCase):
     def test_run_test(self):
         run_test(self)
 
+
 class UserManagement(APITestCase):
     def test_run_create_account(self):
         run_create_account(self)

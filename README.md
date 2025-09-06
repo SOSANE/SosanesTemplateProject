@@ -39,28 +39,22 @@ Exécuter avec Docker:
 docker compose up --build
 ```
 
-Attendre que tous les containers ont finis de build. L'interface Swagger UI pour le backend est accessible sur: http://127.0.0.1:8000/
+Attendre que tous les containers ont finis de build. L'interface Swagger UI pour le backend est accessible sur: http://localhost:8000/
 
 ![swagger-ui-interface](/docs/images/swagger-ui-interface.png)
 
-### Éxecuter des tests
+### Exécuter des tests
 ```sh
 docker exec -it project_backend bash
-```
-
-```sh
 python manage.py test tests
 ```
 
 ### Créer un super-utilisateur (superuser)
 ```sh
 docker exec -it project_backend bash
-```
-
-```sh
 python manage.py createsuperuser
 ```
 
-En accédant sur http://127.0.0.1:8000/api/admin, on peut se connecter sur le dashboard d'administrateur
+En accédant sur http://localhost:8000/api/admin, on peut se connecter sur le dashboard d'administrateur
 ![django-admin-login-page](/docs/images/django-admin-login-page.png)
 ![django-admin-interface](/docs/images/django-admin-interface.png)
