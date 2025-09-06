@@ -26,7 +26,7 @@ On se met d'accord sur la tech stack suivante, risque à être modifié:
 - Backend testing: Django's TestCase/DRF's APITestCase
 - Outils CI/CD: Github Actions, container avec Docker
 - Monitoring: Prometheus/Grafana
-- (Potentiellement) Reverse proxy: Nginx
+- Reverse proxy: Nginx
 
 ## Exécuter le projet
 ```sh
@@ -40,8 +40,11 @@ docker compose up --build
 ```
 
 Attendre que tous les containers ont finis de build. L'interface Swagger UI pour le backend est accessible sur: http://localhost:8000/
-
 ![swagger-ui-interface](/docs/images/swagger-ui-interface.png)
+
+
+Le frontend est accessible avec http://localhost:5173/
+![frontend-interface](/docs/images/frontend-interface.png)
 
 ### Exécuter des tests
 ```sh

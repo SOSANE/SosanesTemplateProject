@@ -28,7 +28,8 @@ jobs:
           docker commit project_backend project_backend:latest
           docker commit project_frontend project_frontend:latest
           docker commit project_nginx project_nginx:latest
-          docker save project_db:latest project_backend:latest project_frontend:latest project_nginx:latest -o project.tar
+          docker commit project_redis project_redis:latest
+          docker save project_db:latest project_backend:latest project_frontend:latest project_nginx:latest project_redis:latest -o project.tar
 
       - name: Uploader une image en tant qu'artifact
         uses: actions/upload-artifact@v4
@@ -61,6 +62,10 @@ jobs:
 
   quality_gate:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,20 +83,22 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
-          glob_pattern: "**/*.py"
-          pylint_rc: /backend/.pylintrc
+          workdir: backend
+          pylint_args: "--rcfile=.pylintrc"
 
       - name: (Backend) Vérification du formatage
         uses: reviewdog/action-black@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          workdir: backend
+          black_args: "--check ."
           level: warning
 
       - name: (Frontend) Analyse du code
         uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workdir: ./frontend/
+          workdir: frontend
           reporter: github-pr-review
           level: warning
