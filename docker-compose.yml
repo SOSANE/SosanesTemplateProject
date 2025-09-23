@@ -13,7 +13,7 @@ services:
     volumes:
         - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U postfres -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,6 +36,7 @@ services:
     container_name: project_frontend
     volumes:
       - ./frontend:/home/node
+      - /home/node/node_modules
     build: ./frontend
     working_dir: /home/node
   # Nginx reverse proxy
