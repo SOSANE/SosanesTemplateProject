@@ -5,5 +5,5 @@ COPY package*.json .
 RUN npm install
 COPY . .
 
-CMD ["/bin/bash", "entrypoint.sh"]
+CMD npm run dev
 ENV TZ America/Toronto

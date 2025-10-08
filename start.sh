@@ -41,7 +41,7 @@ check_prerequisites() {
     fi
     
     # Vérifier Docker Compose
-    if ! command -v docker-compose &> /dev/null; then
+    if ! command -v docker compose &> /dev/null; then
         log_error "Docker Compose n'est pas installé. Veuillez l'installer d'abord."
         exit 1
     fi
@@ -60,30 +60,31 @@ initialize_project() {
     log_info "Initialisation du projet..."
     
     # Copier le template Docker Compose si nécessaire
-    if [ ! -f "docker-compose.yml" ]; then
-        if [ -f "docker-compose.template.yml" ]; then
-            cp docker-compose.template.yml docker-compose.yml
-            log_success "Template Docker Compose copié"
-        else
-            log_error "Fichier docker-compose.template.yml introuvable"
-            exit 1
-        fi
+    if [ -f "docker-compose.yml" ]; then
+        log_success "Fichier docker-compose.yml trouvé"
+    else 
+        log_error "Fichier docker-compose.yml introuvable"
+        exit 1
     fi
     
     # Créer le fichier .env si nécessaire
-    if [ ! -f ".env" ]; then
-        if [ -f ".env.example" ]; then
-            cp .env.example .env
-            log_success "Fichier .env créé à partir de .env.example"
-            log_warning "N'oubliez pas de modifier les mots de passe dans .env"
+    if [ ! -f ".env.local" ]; then
+        if [ -f ".env.local.exemple" ]; then
+            cp .env.local.exemple .env.local
+            log_success "Fichier .env.local créé à partir de .env.local.exemple"
+            log_warning "N'oubliez pas de modifier les mots de passe dans .env.local"
         else
-            log_warning "Fichier .env.example introuvable, création d'un .env minimal"
-            cat > .env << EOF
-POSTGRES_DB=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=UQO123?
-JWT_SECRET=your-secret-key-change-this
-REACT_APP_API_URL=http://localhost:8000/api
+            log_warning "Fichier .env.local.exemple introuvable, création d'un .env.local minimal"
+            cat > .env.local << EOF
+DATABASE_NAME=SHOPEASY
+DATABASE_USER=postgres
+DATABASE_PASSWORD= # Insérez un mot de passe
+DATABASE_HOST=db
+DATABASE_PORT=5432
+REDIS_URL=redis://redis:6379
+POSTGRES_USER=${DATABASE_USER}
+POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+POSTGRES_DB=${DATABASE_NAME}
 EOF
         fi
     fi
@@ -92,7 +93,7 @@ EOF
 # Fonction pour nettoyer l'environnement
 cleanup() {
     log_info "Nettoyage de l'environnement..."
-    docker-compose down -v 2>/dev/null || true
+    docker compose down -v 2>/dev/null || true
     docker system prune -f 2>/dev/null || true
     log_success "Environnement nettoyé"
 }
@@ -105,9 +106,9 @@ start_services() {
     
     if [ -n "$profile" ]; then
         log_info "Utilisation du profil: $profile"
-        docker-compose --profile "$profile" up -d
+        docker compose --profile "$profile" up --build -d
     else
-        docker-compose up -d
+        docker compose up -d
     fi
     
     log_info "Attente du démarrage des services..."
@@ -123,7 +124,7 @@ check_services() {
     
     # Vérifier le backend
     for i in {1..30}; do
-        if curl -s http://localhost:8000/actuator/health > /dev/null 2>&1; then
+        if curl -s http://localhost:8000 > /dev/null 2>&1; then
             log_success "Backend démarré et accessible"
             break
         fi
@@ -143,7 +144,7 @@ check_services() {
     fi
     
     # Vérifier la base de données
-    if docker-compose exec -T db pg_isready -U app_user > /dev/null 2>&1; then
+    if docker compose exec -T db pg_isready -U postgres > /dev/null 2>&1; then
         log_success "Base de données accessible"
     else
         log_warning "Base de données pas encore prête"
@@ -153,23 +154,23 @@ check_services() {
 # Fonction pour afficher les logs
 show_logs() {
     log_info "Affichage des logs récents..."
-    docker-compose logs --tail=20
+    docker compose logs --tail=20
 }
 
 # Fonction pour afficher le statut
 show_status() {
     log_info "Statut des services:"
-    docker-compose ps
+    docker compose ps
     
     echo ""
     log_info "Services accessibles:"
     echo "  🌐 Frontend:     http://localhost:5173"
     echo "  🔧 Backend API:  http://localhost:8000/api"
     echo "  📚 Swagger UI:   http://localhost:8000/"
-    echo "  📊 Actuator:     http://localhost:8000/actuator"
+    echo "  📊 Django admin: http://localhost:8000/api/admin/"
     
     # Vérifier si monitoring est actif
-    if docker-compose ps | grep -q prometheus; then
+    if docker compose ps | grep -q prometheus; then
         echo "  📈 Prometheus:   http://localhost:9090"
         echo "  📊 Grafana:      http://localhost:3001 (admin/admin123)"
     fi
@@ -207,12 +208,12 @@ main() {
             ;;
         "stop")
             log_info "Arrêt de l'application..."
-            docker-compose down
+            docker compose down
             log_success "Application arrêtée"
             ;;
         "restart")
             log_info "Redémarrage de l'application..."
-            docker-compose down
+            docker compose down
             start_services "$2"
             show_status
             ;;
@@ -221,9 +222,9 @@ main() {
             ;;
         "logs")
             if [ -n "$2" ]; then
-                docker-compose logs "$2"
+                docker compose logs "$2"
             else
-                docker-compose logs
+                docker compose logs
             fi
             ;;
         "clean")
@@ -232,11 +233,11 @@ main() {
         "test")
             log_info "Lancement des tests..."
             if [ -f "docker-compose.test.yml" ]; then
-                docker-compose -f docker-compose.test.yml up -d
+                docker compose -f docker-compose.test.yml up -d
                 sleep 20
-                docker-compose -f docker-compose.test.yml exec -T backend ./mvnw test
-                docker-compose -f docker-compose.test.yml exec -T frontend npm test -- --coverage --watchAll=false
-                docker-compose -f docker-compose.test.yml down -v
+                docker compose -f docker-compose.test.yml exec -T backend ./mvnw test
+                docker compose -f docker-compose.test.yml exec -T frontend npm test -- --coverage --watchAll=false
+                docker compose -f docker-compose.test.yml down -v
             else
                 log_warning "Fichier docker-compose.test.yml introuvable"
             fi
