@@ -76,15 +76,19 @@ initialize_project() {
         else
             log_warning "Fichier .env.local.exemple introuvable, création d'un .env.local minimal"
             cat > .env.local << EOF
-DATABASE_NAME=SHOPEASY
-DATABASE_USER=postgres
-DATABASE_PASSWORD= # Insérez un mot de passe
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
+DATABASE_NAME=${POSTGRES_DB}
+DATABASE_USER=${POSTGRES_USER}
+DATABASE_PASSWORD=${POSTGRES_DB}
 DATABASE_HOST=db
 DATABASE_PORT=5432
+REACT_APP_API_URL=http://localhost:8000/api
+REACT_APP_ENV=development
+ENVIRONMENT=local
 REDIS_URL=redis://redis:6379
-POSTGRES_USER=${DATABASE_USER}
-POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-POSTGRES_DB=${DATABASE_NAME}
+GRAFANA_ADMIN_PASSWORD=password
 EOF
         fi
     fi
