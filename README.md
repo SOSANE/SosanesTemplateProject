@@ -1,14 +1,6 @@
 # Template pour le projet de session INF1763
 
-Template pour le projet de session INF1763 (Techniques et outils professionnels de développement logiciel), automne 2025. Remise du projet en décembre.
-
-Ce template existe car nous n'avons pas encore décidé du sujet de projet. Voici les projet proposés:
-1.	TaskFlow - Plateforme de gestion de tâches collaborative
-2.	**ShopEasy** - Système de e-commerce simplifié
-3.	KnowledgeHub - Plateforme de partage de connaissances
-4.	FitTracker - Application de suivi fitness
-5.	**BookingSystem** - Système de réservation
-6.	QuizMaster - Plateforme de quiz et évaluations
+Template de projet de développement d'application utilisant: Python (Django), React et Postgres.
 
 Le tech stack de ce projet est inspiré du CAT Stack (application project thundercat) - Une collaboration entre Code for Canada & Public Service Commission of Canada
 
@@ -31,12 +23,30 @@ On se met d'accord sur la tech stack suivante, risque à être modifié:
 ## Exécuter le projet
 ```sh
 git clone https://github.com/SOSANE/SosanesTemplateProject.git
-cd sosanestemplateproject
+cd SosanesTemplateProject
 ```
+
+Copier les variables d'environnement
+```sh
+cp .env.local.exemple .env.local
+```
+Modifier `DATABASE_PASSWORD` & `GRAFANA_ADMIN_PASSWORD` dans `.env.local`
+```dotenv
+# Base de données
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=<Insérez un mot de passe>
+POSTGRES_DB=postgres
+
+# ...
+
+# Monitoring
+GRAFANA_ADMIN_PASSWORD=<Insérez un mot de passe>
+```
+
 
 Exécuter avec Docker:
 ```sh
-docker compose up --build
+docker compose up --build -d
 ```
 
 Attendre que tous les containers ont finis de build. L'interface Swagger UI pour le backend est accessible sur: http://localhost:8000/

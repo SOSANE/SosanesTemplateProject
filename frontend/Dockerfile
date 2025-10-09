@@ -1,5 +1,9 @@
 FROM node:22.14.0
 WORKDIR /home/node
 
-CMD ["/bin/bash", "entrypoint.sh"]
+COPY package*.json .
+RUN npm install
+COPY . .
+
+CMD npm run dev
 ENV TZ America/Toronto

@@ -4,16 +4,14 @@ services:
     restart: always
     container_name: project_db
     image: postgres:14.19-alpine3.21
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=UQO123?
-      - POSTGRES_DB=postgres
-    ports: 
+    env_file:
+      - .env.local
+    ports:
       - 5433:5432
     volumes:
-        - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U postfres -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,6 +19,8 @@ services:
   backend:
     container_name: project_backend
     build: ./backend
+    env_file:
+      - .env.local
     volumes:
       - ./backend/:/backend
     working_dir: /backend
@@ -34,8 +34,11 @@ services:
   # Frontend React
   frontend:
     container_name: project_frontend
+    env_file:
+      - .env.local
     volumes:
       - ./frontend:/home/node
+      - /home/node/node_modules
     build: ./frontend
     working_dir: /home/node
   # Nginx reverse proxy
@@ -58,7 +61,34 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-
+  # Monitoring avec Prometheus
+  prometheus:
+    image: prom/prometheus:v3.6.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+  # Grafana pour visualisation (optionnel)
+  # grafana:
+  #   image: grafana/grafana:12.3.0-18329792253
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #     - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+  #     - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+  #   depends_on:
+  #     - prometheus
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  # grafana_data:
